@@ -6,46 +6,91 @@
     fxLayoutGap="10px"
     fxLayoutGap.xs="0">
 
-  <div fxFlex="40">
-    <div fxFlex *ngIf="dish">
-      <md-card>
-        <md-card-header>
-          <md-card-title>
-            <h3>{{dish.name | uppercase}}</h3>
-          </md-card-title>
-        </md-card-header>
-        <img md-card-image src={{dish.image}} alt={{dish.name}}>
-        <md-card-content>
-          <p>{{dish.description}}
-          </p>
-        </md-card-content>
-        <md-card-actions>
-          <button md-button (click)="goBack()">BACK</button>
-          <button md-button>LIKE</button>
-          <button md-button>SHARE</button>
-        </md-card-actions>
-      </md-card>
-    </div>
+  <div fxFlex="40" *ngIf="dish">
+    <md-card>
+      <md-card-header>
+        <md-card-title>
+          <h3>{{dish.name | uppercase}}</h3>
+        </md-card-title>
+      </md-card-header>
+      <img md-card-image src={{dish.image}} alt={{dish.name}}>
+      <md-card-content>
+        <p>{{dish.description}}
+        </p>
+      </md-card-content>
+      <md-card-actions>
+        <button md-button [routerLink]="['/dishdetail', prev]"><span class="fa fa-chevron-left fa-lg"></span></button>
+        <button md-button (click)="goBack()">BACK</button>
+        <button md-button>LIKE</button>
+        <button md-button>SHARE</button>
+        <span class="flex-spacer"></span>
+        <button md-button [routerLink]="['/dishdetail', next]"><span class="fa fa-chevron-right fa-lg"></span></button>
+      </md-card-actions>
+    </md-card>
   </div>
 
-  <div fxFlex="40">
-    <div fxFlex *ngIf="dish">
-      <md-list fxFlex>
-        <h3>Comments</h3>
+  <div fxFlex="40" *ngIf="dish">
+    <md-list fxFlex>
+      <h3>Comments</h3>
 
-        <md-list-item *ngFor="let line of dish.comments">
-          <p md-line>
-            <span> {{line.comment}} </span>
-          </p>
-          <p md-line>
-            <span> {{line.rating}} Stars</span>
-          </p>
-          <p md-line>
-            <span> -- {{line.author}} {{ line.date | date }} </span>
-          </p>
-        </md-list-item>
-      </md-list>
-    </div>
+      <md-list-item *ngFor="let line of dish.comments">
+        <p md-line>
+          <span> {{line.comment}} </span>
+        </p>
+        <p md-line>
+          <span> {{line.rating}} Stars</span>
+        </p>
+        <p md-line>
+          <span> -- {{line.author}} {{ line.date | date }} </span>
+        </p>
+      </md-list-item>
+
+      <br>
+      <md-list-item *ngIf="commentForm.valid">
+        <p md-line>
+          <span> {{commentForm.value.comment}} </span>
+        </p>
+        <p md-line>
+          <span> {{commentForm.value.rating}} Stars</span>
+        </p>
+        <p md-line>
+          <span> -- {{commentForm.value.author}} </span>
+        </p>
+      </md-list-item>
+
+      <form novalidate [formGroup]="commentForm" (ngSubmit)="onSubmit()">
+        <p>
+          <md-input-container style="width: 95%"
+           dividerColor="{{(formErrors.author) ? 'warn' : 'primary'}}">
+            <input mdInput formControlName="author" placeholder="Author" type="text" required>
+            <md-hint>
+              <span [hidden]="!(formErrors.author)">
+                {{formErrors.author}}</span>
+            </md-hint>
+          </md-input-container>
+        </p>
+        <p>
+            <md-slider style="width: 40%" thumbLabel tickInterval="1" min="1" max="5" step="1" value="5" mdInput formControlName="rating"></md-slider>
+        </p>
+        <p>
+          <md-input-container style="width: 95%"
+            dividerColor="{{(formErrors.comment) ? 'warn' : 'primary'}}">
+            <textarea mdInput formControlName="comment" placeholder="Your Comment" rows=12></textarea>
+            <md-hint>
+              <span [hidden]="!(formErrors.comment)">
+                {{formErrors.comment}}</span>
+            </md-hint>
+          </md-input-container>
+        </p>
+        <button type="submit" md-button class="background-primary text-floral-white" [disabled]="commentForm.invalid">Submit</button>
+      </form>
+
+    </md-list>
+
+  </div>
+
+  <div [hidden]="dish">
+    <md-spinner></md-spinner><h4>Loading . . . Please Wait</h4>
   </div>
 
 </div>
