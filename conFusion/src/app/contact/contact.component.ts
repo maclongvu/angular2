@@ -2,17 +2,34 @@ import { Component, OnInit } from '@angular/core';
 
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Feedback, ContactType } from '../shared/feedback';
+import { visibility, flyInOut, expand } from '../animations/app.animation';
+
+import { FeedbackService } from '../services/feedback.service';
 
 @Component({
   selector: 'app-contact',
   templateUrl: './contact.component.html',
-  styleUrls: ['./contact.component.scss']
+  styleUrls: ['./contact.component.scss'],
+  host: {
+    '[@flyInOut]': 'true',
+    'style': 'display: block;'
+    },
+  animations: [
+    flyInOut(),
+    visibility(),
+    expand()
+  ]
 })
 export class ContactComponent implements OnInit {
 
   feedbackForm: FormGroup;
   feedback: Feedback;
+  confirmFeedback : Feedback;
   contactType = ContactType;
+  status = "none";
+  formVisibility = 'shown';
+  submitVisibility = 'hidden';
+  visibility = 'hidden';
 
   formErrors = {
     'firstname': '',
@@ -42,7 +59,7 @@ export class ContactComponent implements OnInit {
     },
   };
 
-  constructor(private fb: FormBuilder) {
+  constructor(private feedbackService: FeedbackService, private fb: FormBuilder) {
     this.createForm();
   }
 
@@ -69,6 +86,7 @@ export class ContactComponent implements OnInit {
   onSubmit() {
     this.feedback = this.feedbackForm.value;
     console.log(this.feedback);
+    this.status = "saving";
     this.feedbackForm.reset({
       firstname: '',
       lastname: '',
@@ -77,7 +95,17 @@ export class ContactComponent implements OnInit {
       agree: false,
       contacttype: 'None',
       message: ''
-    });
+      });
+    this.feedbackService.submitFeedback(this.feedback)
+      .subscribe(retFeedback => { this.confirmFeedback = retFeedback; this.status = "saved";
+        this.formVisibility = 'hidden';
+        this.submitVisibility = 'shown';
+        setTimeout(() => {
+            this.status = "none";
+            this.formVisibility = 'shown';
+            this.submitVisibility = 'hidden';
+          }, 5000);
+      });
   }
 
   onValueChanged(data?: any) {
